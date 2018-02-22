@@ -41,17 +41,19 @@ prince_tidy <- prince_raw %>%
 temp <- tempfile()
 download.file("http://www.opendata.hu/storage/f/2016-06-06T11%3A27%3A11.366Z/precosenti.zip",temp)
 con <- unz(temp, "PrecoSenti/PrecoPos.txt")
-pos <- read.csv(con, stringsAsFactors = FALSE, col.names = FALSE) %>% 
+pos <- read.csv(con, stringsAsFactors = FALSE, col.names = FALSE, encoding="UTF-8") %>% 
   mutate(score = 1, languages = "hu") %>% 
   rename(word = FALSE.)
 con2 <- unz(temp, "PrecoSenti/PrecoNeg.txt")
-neg <- read.csv(con, stringsAsFactors = FALSE, col.names = FALSE) %>% 
+neg <- read.csv(con, stringsAsFactors = FALSE, col.names = FALSE, encoding="UTF-8") %>% 
   mutate(score = -1, languages = "hu") %>% 
   rename(word = FALSE.)
 
 sentiments_hu <- rbind(pos, neg)  # this could be a one-liner with the previous too
 
-sentiments_en_lou <- get_sentiments("loughran") %>% 
+# sentiments_en_lou <- get_sentiments(loughran) %>% 
+
+sentiments_en_lou <- get_sentiments("bing") %>% 
   mutate(score = if_else(sentiment == "positive", 1, -1)) %>% 
   mutate(sentiment = NULL, languages ="en")
 
@@ -72,10 +74,55 @@ sentiments <- rbind(sentiments_en_lou, sentiments_hu)
 prince_tidy %>% 
   group_by(languages) %>% 
   inner_join(sentiments) %>% 
-  summarise( sent = sum(score^2))
+  summarise( sent = sum(score))
 
 
 
+ wc <- prince_tidy %>% 
+#  group_by(languages) %>% 
+  inner_join(sentiments) %>% 
+  group_by(languages) %>% 
+  count(word, score, sort = TRUE) %>% 
+ ungroup()
+
+
+ wc
+ 
+
+
+
+
+# good plot
+wc %>%
+  group_by(languages,score) %>% top_n(8) %>% ungroup() %>% mutate(word = reorder(word, n)) %>%
+  ggplot(aes(word, n*score, fill = score)) + geom_col(show.legend = FALSE) +
+  facet_wrap(~languages, scales = "free_y") + labs(y = "Contribution to sentiment", 
+                                                   x = NULL) + coord_flip()
+
+
+
+# comparing languages by 250 words
+prince_tidy <- prince_raw %>% 
+  unnest_tokens(word, text) 
+  
+
+
+
+
+to_plot <- prince_tidy %>%
+  group_by(languages) %>% 
+  mutate(row = row_number()) %>% 
+  ungroup() %>% 
+  inner_join(sentiments) %>% 
+  group_by(languages, index = row %/% 250) %>% 
+  summarize(sentiment = sum(score)) %>% 
+  ungroup()
+
+
+to_plot %>%
+  ggplot(aes(index, sentiment, fill = languages)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~languages, ncol = 1, scales = "free_x")
 
 
 #----------------------------------
@@ -88,44 +135,12 @@ stopwords_hun <- data_frame(word = stopwords("hu", source = "stopwords-iso"))
 str(stopwords("hu", source = "stopwords-iso"))
 
 
-text_df <- data_frame(docnum = 1, text = prince_eng_text)
-
-freq_words <- text_df %>% 
-  unnest_tokens(word, text) %>% 
-  anti_join(stopwords_eng) %>% 
-  count(word, sort = TRUE) %>% 
-  top_n(10)
 
 sentiments_eng_lou <- get_sentiments("loughran") %>% mutate(score = if_else(sentiment == "positive", 1, -1))
 
-text_df %>% 
-  unnest_tokens(word, text) %>% 
-  inner_join(sentiments_eng_lou) %>% 
-  summarise( sent = sum(score))
-
 sentiments_eng_bing <- get_sentiments("bing") %>% mutate(score = if_else(sentiment == "positive", 1, -1))
 
-text_df %>% 
-  unnest_tokens(word, text) %>% 
-  inner_join(sentiments_eng_bing) %>% 
-  summarise( sent = sum(score))
 
 
 
-anti_join(stopwords_eng) %>% 
-  count(word, sort = TRUE) %>% 
-  top_n(10)
-
-hun_neg <- read_csv("PrecoNeg.txt", col_names = FALSE) %>% mutate(score = -1) %>% rename(word = X1)
-hun_pos <- read_csv("PrecoPos.txt", col_names = FALSE) %>% mutate(score =  1) %>% rename(word = X1)
-
-
-sentiments_hun <- rbind(hun_pos, hun_neg)
-
-
-text_df_hun <- data_frame(docnum = 1, text = prince_hun_text)
-text_df_hun %>% 
-  unnest_tokens(word, text) %>% 
-  inner_join(sentiments_hun) %>% 
-  summarise( sent = sum(score))
 
