@@ -7,6 +7,6 @@ The idea is to see the differences between the languages and the (available) sen
 There is a second analyis, Dickens vs. Twain that shows some interesting aspects of the letters written by these authors. 
 
 
-Both works are **homework 2** for the course  **DS of Unstructured Text Data course** held by *Eduardo Ariño de la Rubia* on CEU in 2018.
+Both works are **homework 2** for the course  **DS of Unstructured Text Data** held by *Eduardo Ariño de la Rubia* on CEU in 2018.
 
 Tamas Burghard
