@@ -2,6 +2,7 @@ library(tidyverse)
 library(tidytext)
 library(rvest)
 library(stopwords)
+library(proustr)
 
 #Sys.setlocale(category = "LC_ALL", "en_US.UTF-8")
 
@@ -9,6 +10,8 @@ library(stopwords)
 # Szab? Martina Katalin 2014. Egy magyar nyelv? szentimentlexikon l?trehoz?s?nak
 # tapasztalatai [Experiences of creation of a Hungarian sentiment lexicon]. 
 # Conference ?Nyelv, kult?ra, t?rsadalom?, Budapest, Hungary. 
+
+rm(list = ls())
 
 
 links <- c("https://www.odaha.com/antoine-de-saint-exupery/maly-princ/the-little-prince",
@@ -38,6 +41,8 @@ prince_tidy <- prince_raw %>%
 
 
 ## SENTIMENT LISTS
+
+# HUNGARIAN SENTIMENTS
 temp <- tempfile()
 download.file("http://www.opendata.hu/storage/f/2016-06-06T11%3A27%3A11.366Z/precosenti.zip",temp)
 con <- unz(temp, "PrecoSenti/PrecoPos.txt")
@@ -55,8 +60,18 @@ sentiments_hu <- rbind(pos, neg)  # this could be a one-liner with the previous 
 
 sentiments_en_lou <- get_sentiments("bing") %>% 
   mutate(score = if_else(sentiment == "positive", 1, -1)) %>% 
-  mutate(sentiment = NULL, languages ="en")
+  mutate(sentiment = NULL, languages = "en")
 
+sentiments_fr <- proust_sentiments(type = "polarity") %>%   # full with common words, seems useless without filtering
+  mutate(score = if_else(polarity == "positive", 1, -1)) %>% 
+  mutate(polarity = NULL, languages = "fr")
+
+sent_fr <- proust_sentiments(type = "score")
+
+sent_fr %>% filter(word == "petit")
+sent_fr %>% 
+  group_by(sentiment) %>% 
+  summarise(n = n())
 
 # should fix this
 #download.file("http://habla.dc.uba.ar/gravano/files/SpanishDAL-v1.2.tgz",temp)
@@ -68,7 +83,7 @@ sp <-read.csv("http://danigayo.info/downloads/Ratings_Warriner_et_al_Spanish.csv
 
 
 
-sentiments <- rbind(sentiments_en_lou, sentiments_hu)
+sentiments <- rbind(sentiments_en_lou, sentiments_hu, sentiments_fr)
 
 
 prince_tidy %>% 

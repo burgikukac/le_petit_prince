@@ -9,4 +9,7 @@ There is a second analyis, Dickens vs. Twain that shows some interesting aspects
 
 Both works are **homework 2** for the course  **DS of Unstructured Text Data** held by *Eduardo Ariño de la Rubia* on CEU in 2018.
 
+Now there is a third file, **topic_modeling** which is a basic analysis for the third homework.
+
+
 Tamas Burghard
