@@ -6,6 +6,8 @@ library(stringr)
 library(stopwords)
 library(reshape2)
 library(RColorBrewer)
+library(urltools)
+library(rvest)
 
 authors <- gutenberg_authors %>% 
   filter(deathdate > 1850)
@@ -38,3 +40,39 @@ meta3 %>%
   group_by(wikipedia) %>% 
   summarise(N = n()) %>% 
   arrange(desc(N))  -> kukucs
+
+look_this <- meta3 %>% sample_n(10)
+
+url1 <- "https://www.worldcat.org/search?qt=worldcat_org_bks&q="
+
+#Goodale%2C+S.+L.+%28Stephen+Lincoln%29+%3A+The+Principles+of+Breeding+or%2C+Glimpses+at+the+Physiological+Laws+involved+in+the+Reproduction+and+Improvement+of+Domestic+Animals
+
+url3 <- "&fq=dt%3Abks"
+
+value_to_set  <- paste(look_this$author, look_this$title, sep = " : " ) 
+value_to_set 
+v2 <- url_encode(value_to_set)
+v2
+
+
+url <- paste0(url1, v2, url3)
+
+raw   <- tibble(v2, links = url) %>% 
+  mutate( webpages = map(links, read_html)) %>% 
+  mutate( nodes = map(webpages, html_nodes, '.itemPublisher')) %>% 
+  mutate( text = map(nodes, html_text)) 
+#%>% 
+#  select(languages, text)
+
+
+# url <- "http://en.wikipedia.org/wiki/api.php?action=parse&pageid=1023&export=json"
+# url <- param_set(url, key = "pageid", value = "12")
+# url
+# # [1] "http://en.wikipedia.org/wiki/api.php?action=parse&pageid=12&export=json"
+# 
+# As you can see this works pretty well; it even works in situations where the URL doesn't have a query yet:
+# 
+# url <- "http://en.wikipedia.org/wiki/api.php"
+# url <- param_set(url, key = "pageid", value = "12")
+# url
+# # [1] "http://en.wikipedia.org/wiki/api.php?pageid=12"
