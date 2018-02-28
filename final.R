@@ -31,7 +31,8 @@ meta2 %>%
          !str_detect(gutenberg_bookshelf, "Australia"),
          !str_detect(gutenberg_bookshelf, "United Kingdom"),
          !str_detect(gutenberg_bookshelf, "Animals"),
-         str_detect(gutenberg_bookshelf, "iction")
+         str_detect(gutenberg_bookshelf, "iction"),
+         str_detect(author, ",")
          
          
   ) -> meta3
@@ -43,21 +44,30 @@ meta3 %>%
 
 look_this <- meta3 %>% sample_n(10)
 
+# url1 <- "https://www.worldcat.org/search?qt=worldcat_org_bks&q="
+# 
+# #Goodale%2C+S.+L.+%28Stephen+Lincoln%29+%3A+The+Principles+of+Breeding+or%2C+Glimpses+at+the+Physiological+Laws+involved+in+the+Reproduction+and+Improvement+of+Domestic+Animals
+# 
+# url3 <- "&fq=dt%3Abks"
+# 
+# value_to_set  <- paste(look_this$author, look_this$title, sep = " : " ) 
+# value_to_set 
+# v2 <- url_encode(value_to_set)
+# v2
+# 
+# 
+# url <- paste0(url1, v2, url3)
+
 url1 <- "https://www.worldcat.org/search?qt=worldcat_org_bks&q="
 
-#Goodale%2C+S.+L.+%28Stephen+Lincoln%29+%3A+The+Principles+of+Breeding+or%2C+Glimpses+at+the+Physiological+Laws+involved+in+the+Reproduction+and+Improvement+of+Domestic+Animals
+url2 <- paste0("ti:", url_encode( look_this$title))
+url3 <- paste0("+au:", ulr_encode(look_this$author))
 
-url3 <- "&fq=dt%3Abks"
+url4 <- "&qt=advanced&dblist=638"
 
-value_to_set  <- paste(look_this$author, look_this$title, sep = " : " ) 
-value_to_set 
-v2 <- url_encode(value_to_set)
-v2
+url <- paste0(url1, url2, url3, url4)
 
-
-url <- paste0(url1, v2, url3)
-
-raw   <- tibble(v2, links = url) %>% 
+raw2   <- tibble(v2, links = url) %>% 
   mutate( webpages = map(links, read_html)) %>% 
   mutate( nodes = map(webpages, html_nodes, '.itemPublisher')) %>% 
   mutate( text = map(nodes, html_text)) 
@@ -76,3 +86,14 @@ raw   <- tibble(v2, links = url) %>%
 # url <- param_set(url, key = "pageid", value = "12")
 # url
 # # [1] "http://en.wikipedia.org/wiki/api.php?pageid=12"
+
+
+
+
+
+## to extract year number
+## input: messy string from scrape
+## output: 4 digit number, starting with 1-2
+## method: extracting from the last 6 characters
+s1 <- str_trunc(raw2$text[[2]], 6, side = "left", ellipsis = "")
+str_extract_all(s1, "[0-9]{4,4}")
