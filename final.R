@@ -47,7 +47,7 @@ meta3 %>%
   summarise(N = n()) %>% 
   arrange(desc(N))  -> kukucs
 
-look_this <- meta3 %>% sample_n(10)
+look_this <- meta3 %>% sample_n(50)
 
 # url1 <- "https://www.worldcat.org/search?qt=worldcat_org_bks&q="
 # 
@@ -72,10 +72,10 @@ url4 <- "&qt=advanced&dblist=638"
 
 url <- paste0(url1, url2, url3, url4)
 
-raw2   <- tibble(v2, links = url) %>% 
-  mutate( webpages = map(links, read_html)) %>% 
-  mutate( nodes = map(webpages, html_nodes, '.itemPublisher')) %>% 
-  mutate( text = map(nodes, html_text)) 
+#raw2   <- tibble(v2, links = url) %>% 
+#  mutate( webpages = map(links, read_html)) %>% 
+#  mutate( nodes = map(webpages, html_nodes, '.itemPublisher')) %>% 
+#  mutate( text = map(nodes, html_text)) 
 
 
 #%>% 
@@ -109,8 +109,8 @@ str(raw2, max.level = 1)
 ## output: 4 digit number, starting with 1-2
 ## method: extracting from the last 6 characters
 
-s1 <- str_trunc(raw2$text[[10]], 6, side = "left", ellipsis = "")
-min(as.numeric(str_extract_all(s1, "[0-9]{4,4}")), na.rm = TRUE)
+#s1 <- str_trunc(raw2$text[[10]], 6, side = "left", ellipsis = "")
+#min(as.numeric(str_extract_all(s1, "[0-9]{4,4}")), na.rm = TRUE)
 
 extract_publish <- function(RAW_TEXT_I) {
   s1 <- str_trunc(RAW_TEXT_I, 6, side = "left", ellipsis = "")
@@ -118,6 +118,6 @@ extract_publish <- function(RAW_TEXT_I) {
   
 }
 
-extract_publish(raw2$text)
+#extract_publish(raw2$text)
 
 map(raw2$text, extract_publish)
