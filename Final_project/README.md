@@ -57,15 +57,15 @@ The number of books is uneven - there are two minor and a major peaks (the latte
 
 x
 
-![afinn_sentiments] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_02_Afinn_sentiments.png)
+![afinn_sentiments](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_02_Afinn_sentiments.png)
 
 x
 
-![nrc_sentiments] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_03_Nrc_sentiments.png)
+![nrc_sentiments](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_03_Nrc_sentiments.png)
 
 x
 
-![anfinn_and_nrc_together] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_05_Afinn_and_NRC_together.png)
+![anfinn_and_nrc_together](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_05_Afinn_and_NRC_together.png)
 
 x
 
