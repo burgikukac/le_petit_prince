@@ -49,7 +49,25 @@ This part was a memory intensive one, this is the only reason to have it separat
 
 ## Analysis, results
 
+It is not very surprising that the combined dataset does not really show shockingly new things. I marked the most important years on all the graphs: the American Civil War, the two World Wars, the Cuban Missile Crisis and 1990- the end of the analysis. 
+
+The number of books is uneven - there are two minor and a major peaks (the latter is around 1960). 
+
 ![histogram](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_01_histogram.png)
+
+x
+
+![afinn_sentiments] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_02_Afinn_sentiments.png)
+
+x
+
+![nrc_sentiments] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_03_Nrc_sentiments.png)
+
+x
+
+![anfinn_and_nrc_together] (https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_05_Afinn_and_NRC_together.png)
+
+x
 
 ## Possible development
 
