@@ -8,41 +8,39 @@
 #  
 #  04 analysis
 # 
-#  This script loads the tidy 
+#  This script loads the tidy text and performs the sentiment analysis 
 #
 #
 #
-#  Input: raw text files from Project Gutenberg
-#  Output: final_tidy file    
+#  Input: 1, final_tidy_1990.Rdata (or feather)
+#         2, download_this.feather (gutenbergR metadata)
+#  Output: graphs    
 # 
 library(tidyverse)
 library(tidytext)
 library(stopwords)
 library(RColorBrewer)
 library(feather)
-
+library(ggExtra)
 
 rm(list = ls())
 
-
-
-
-
-
-
-############################## part 3
-
 # final_tidy_1990 <- read_feather("./Final_project/final_tidy_1990.feather")
-open(file = "./Final_project/final_tidy_1990.RData")
-sentiments <- get_sentiments("afinn")
+load(file = "./Final_project/final_tidy_1990.RData")
 
-#after_sentiment <- final_tidy_1990 %>%
-#  inner_join(look_this)
+download_this <- read_feather("./Final_project/download_this.feather")
 
+metadata <- download_this %>% 
+  select(gutenberg_id, gutenberg_author_id, year)
+
+### wordcounts by book 
 wc_by_book <- final_tidy_1990  %>% 
   group_by(gutenberg_id) %>% 
   summarise(N_ALL = n()) %>% 
   ungroup()
+
+###  sentiments 1: afinn (positive or negative)
+sentiments <- get_sentiments("afinn")
 
 senti_by_book <- final_tidy_1990 %>% 
   inner_join(sentiments) %>% 
@@ -51,11 +49,10 @@ senti_by_book <- final_tidy_1990 %>%
   left_join(wc_by_book) %>% 
   mutate(avg_senti = round(sentiment / N_ALL, 3))
 
-
 senti_by_book_with_meta <- senti_by_book %>% 
-  left_join(download_this)
+  left_join(metadata)
 
-#--- senti with bing
+### sentiments 2: nrc (anger, trust, fear, etc.)
 sentiments_nrc <- get_sentiments("nrc")
 
 senti_by_nrc_with_meta <- final_tidy_1990 %>% 
@@ -64,30 +61,42 @@ senti_by_nrc_with_meta <- final_tidy_1990 %>%
   left_join(wc_by_book) %>% 
   mutate(n = round(n / N_ALL, 3), N_ALL = NULL) %>%  
   #spread(sentiment, n, fill = 0) %>% 
-  left_join(download_this)
+  left_join(metadata)
 
   
   
-  group_by(gutenberg_id) %>% 
-  summarise(sentiment = sum(score, na.rm = TRUE)) %>% 
-  left_join(wc_by_book) %>% 
-  mutate(avg_senti = round(sentiment / N_ALL, 3))
+############### plot 1 histogram : publish year
+ggplot(metadata, aes(year)) +
+  geom_histogram() + 
+  geom_vline(xintercept = 1914, col="red") + 
+  geom_vline(xintercept = 1939, col="red") +
+  geom_vline(xintercept = 1861, col="red") +
+  geom_vline(xintercept = 1989, col="red") +
+  geom_vline(xintercept = 1962, col="red") +
+  geom_rect(xmin = 1914, xmax = 1918, 
+            ymin = 0, ymax = 100,
+            fill = "red", alpha = 0.003) + 
+  geom_rect(xmin = 1939, xmax = 1945, 
+            ymin = 0, ymax = 100,
+            fill = "red", alpha = 0.003) + 
+  geom_rect(xmin = 1861, xmax = 1865, 
+            ymin = 0, ymax = 100,
+            fill = "red", alpha = 0.003) + 
+  labs(title = "Number of books by year",
+       caption = "Red lines: first years of major conflicts \n Civil War, World war 1-2, Cuban Missile Crisis")
 
 
-senti_by_book_with_meta <- senti_by_book %>% 
-  left_join(looked)
+ggsave("./Final_project/Plot_01_histogram.png")
 
+############### plot 2 avg sentiments (2 on the same plot)
 
-## original: meta3
-ggplot(senti_by_book_with_meta, aes(year, avg_senti)) +
+plot2 <- ggplot(senti_by_book_with_meta, aes(year, avg_senti)) +
   geom_point() + 
   geom_vline(xintercept = 1914, col="red") + 
   geom_vline(xintercept = 1939, col="red") +
   geom_vline(xintercept = 1861, col="red") +
   geom_vline(xintercept = 1989, col="red") +
   geom_vline(xintercept = 1962, col="red") +
-  
-  
   geom_rect(xmin = 1914, xmax = 1918, 
             ymin = -1, ymax = 1,
             fill = "red", alpha = 0.003) + 
@@ -96,7 +105,14 @@ ggplot(senti_by_book_with_meta, aes(year, avg_senti)) +
             fill = "red", alpha = 0.003) + 
   geom_rect(xmin = 1861, xmax = 1865, 
             ymin = -1, ymax = 1,
-            fill = "red", alpha = 0.003) 
+            fill = "red", alpha = 0.003) +
+  geom_smooth(se = FALSE)  +
+labs(title = "Afinn sentiments over time",
+     caption = "Red lines: first years of major conflicts \n Civil War, World war 1-2, Cuban Missile Crisis")
+
+
+ggMarginal(plot2, type = "histogram", margins = "x") 
+
 
 
 #  geom_line(aes(y=rollmean(avg_senti, 10, na.pad=TRUE)), color = "red", size = 1)
