@@ -55,15 +55,15 @@ The number of books is uneven - there are two minor and a major peaks (the latte
 
 ![histogram](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_01_histogram.png)
 
-x
+Without the histogram on the top of the next graph, one could think that there are clusters or higher variance clusters - but the truth is that more variance corresponds to larger number of books. For considering something else 5-10 times more data would be necessary. 
 
 ![afinn_sentiments](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_02_Afinn_sentiments.png)
 
-x
+The only reason having the next graph is to check that the previous pattern is valid in the eye of another sentiment lexicon. NRC has more categories, but the basic clusters appear contemporaneously. The 'joy', the 'positive' and the 'trust' categories have similar diminishing shape, the others are mainly constant in average. 
 
 ![nrc_sentiments](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_03_Nrc_sentiments.png)
 
-x
+I set out the negative / positive categories and calculated a similar sentiment value as with the Afinn. The two lines move almost paralell, travelling a U-shape with minor differences. The Afinn (purple line) reaches the most negative value around the Great Depression, and is negative between 1910-1975. The NRC is always positive, the lowest is around 1950. 
 
 ![anfinn_and_nrc_together](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_05_Afinn_and_NRC_together.png)
 
@@ -71,11 +71,11 @@ x
 
 ## Possible development
 
-1. Caching the year extracting part, not scraping everything.
-2. Publish year database for all Gutenberg books. (actually this is not so obvious, just for my analysis the different editions of the same book were not interesting)
-3. Better scraping (more pages, more precise date extraction)
+1. Caching the year extracting part, not scraping everything again if something changes.
+2. Creating the missing Year first published database for all Gutenberg books. (actually this is not so obvious, just for my analysis the different editions of the same book were not interesting)
+3. Better scraping (using more pages, more precise date extraction)
 4. Faster, more robust binding and tidying
-5. With 4., doing the same analysis with more books
+5. With the previous, doing the same analysis with more books
 6. Other sources (letters, articles)
 
 
@@ -90,5 +90,6 @@ x
 7. **breaking up the process of analysis** (different file for different function, saving state in feather files, recalculate what is necessary only)
 8. **basic sentiment analysis** 
 
+In conclusion I am very greatful having this course. Thank you!
 
 Tamas Burghard
