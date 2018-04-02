@@ -49,6 +49,8 @@ This part was a memory intensive one, this is the only reason to have it separat
 
 ## Analysis, results
 
+![histogram](https://github.com/burgikukac/le_petit_prince/blob/master/Final_project/Plot_01_histogram.png)
+
 ## Possible development
 
 1. Caching the year extracting part, not scraping everything.

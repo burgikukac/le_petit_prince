@@ -63,8 +63,24 @@ senti_by_nrc_with_meta <- final_tidy_1990 %>%
   #spread(sentiment, n, fill = 0) %>% 
   left_join(metadata)
 
+
+sentiments_nrc_alter <- sentiments_nrc %>%  # custom sentiment dict. based on only positive and negative
+  filter(sentiment %in% c("positive","negative")) %>% 
+  mutate(score = ifelse(sentiment=="positive", 1, -1))
+
+senti_nrc_pos_neg <- final_tidy_1990 %>% 
+  inner_join(sentiments_nrc_alter) %>% 
+  group_by(gutenberg_id) %>% 
+  summarise(sentiment = sum(score, na.rm = TRUE)) %>% 
+  left_join(wc_by_book) %>% 
+  mutate(avg_senti = round(sentiment / N_ALL, 3)) %>% 
+  left_join(metadata)
   
-  
+senti_together <- senti_by_book_with_meta %>% 
+  rename(avg_senti_afin = avg_senti) %>% 
+  select(gutenberg_id, avg_senti_afin) %>% 
+  left_join(senti_nrc_pos_neg)
+
 ############### plot 1 histogram : publish year
 ggplot(metadata, aes(year)) +
   geom_histogram() + 
@@ -88,7 +104,7 @@ ggplot(metadata, aes(year)) +
 
 ggsave("./Final_project/Plot_01_histogram.png")
 
-############### plot 2 avg sentiments (2 on the same plot)
+############### plot Afinn sentiments (2 on the same plot)
 
 plot2 <- ggplot(senti_by_book_with_meta, aes(year, avg_senti)) +
   geom_point() + 
@@ -111,26 +127,24 @@ labs(title = "Afinn sentiments over time",
      caption = "Red lines: first years of major conflicts \n Civil War, World war 1-2, Cuban Missile Crisis")
 
 
-ggMarginal(plot2, type = "histogram", margins = "x") 
+plot02_with_margin <- ggMarginal(plot2, type = "histogram", margins = "x") 
+plot02_with_margin
+png("./Final_project/Plot_02_Afinn_sentiments.png")
+dev.off()
+# ggsave("./Final_project/Plot_02_Afinn_sentiments.png") # not working well with ggMarginal
 
+############### plot 3 - nrc sentiments
 
-
-#  geom_line(aes(y=rollmean(avg_senti, 10, na.pad=TRUE)), color = "red", size = 1)
-
-#library(zoo)
-
-
-
-ggplot(senti_by_nrc_with_meta, aes(year, n)) +
+ggplot(senti_by_nrc_with_meta, aes(year, n, color = factor(sentiment))) +
   geom_point() + 
+  geom_smooth(se = FALSE, color = "black", size = 1.5) +
+  theme(legend.position="none") + 
   facet_wrap(~ sentiment) + 
   geom_vline(xintercept = 1914, col="red") + 
   geom_vline(xintercept = 1939, col="red") +
   geom_vline(xintercept = 1861, col="red") +
   geom_vline(xintercept = 1989, col="red") +
   geom_vline(xintercept = 1962, col="red") +
-  
-  
   geom_rect(xmin = 1914, xmax = 1918, 
             ymin = -1, ymax = 1,
             fill = "red", alpha = 0.003) + 
@@ -139,8 +153,11 @@ ggplot(senti_by_nrc_with_meta, aes(year, n)) +
             fill = "red", alpha = 0.003) + 
   geom_rect(xmin = 1861, xmax = 1865, 
             ymin = -1, ymax = 1,
-            fill = "red", alpha = 0.003)
+            fill = "red", alpha = 0.003) +
+  labs(title = "Nrc sentiments over time", x = '', 
+       caption = "Red lines: first years of major conflicts \n Civil War, World war 1-2, Cuban Missile Crisis")
 
+ggsave("./Final_project/Plot_03_Nrc_sentiments.png") 
 
 
 
@@ -166,16 +183,7 @@ ggplot(senti_by_nrc_with_meta, aes(year, n, color = sentiment)) +
             ymin = -1, ymax = 1,
             fill = "red", alpha = 0.003)
 
-
-## additional stats
-stats <- senti_by_nrc_with_meta %>% 
-  group_by(sentiment, year ) %>% 
-  summarize(
-    min = min(n),
-    max = max(n),
-    mean = round(mean(n) , 3)) %>% 
-  filter(sentiment == "fear")
-
+##### plot 4
 
 ggplot(stats, aes(year, mean, color = sentiment)) +
   geom_line(color = "black") +
@@ -197,4 +205,37 @@ ggplot(stats, aes(year, mean, color = sentiment)) +
             ymin = -1, ymax = 1,
             fill = "red", alpha = 0.003)
 
+
+
+
+
+
+############### plot Afinn + nrcsentiments (2 on the same plot)
+
+plot5 <- ggplot(senti_together, aes(year, avg_senti)) +
+  geom_smooth(se = FALSE) +
+  geom_smooth(aes(year, avg_senti_afin), color = "purple", se = FALSE) +
+  scale_x_continuous(breaks = seq(1850, 1990, 10)) +
+  geom_vline(xintercept = 1914, col="red") + 
+  geom_vline(xintercept = 1939, col="red") +
+  geom_vline(xintercept = 1861, col="red") +
+  geom_vline(xintercept = 1989, col="red") +
+  geom_vline(xintercept = 1962, col="red") +
+  geom_rect(xmin = 1914, xmax = 1918, 
+            ymin = -1, ymax = 1,
+            fill = "red", alpha = 0.003) + 
+  geom_rect(xmin = 1939, xmax = 1945, 
+            ymin = -1, ymax = 1,
+            fill = "red", alpha = 0.003) + 
+  geom_rect(xmin = 1861, xmax = 1865, 
+            ymin = -1, ymax = 1,
+            fill = "red", alpha = 0.003) +
+  geom_smooth(se = FALSE)  +
+  labs(title = "Afinn and NRC sentiments over time",
+       caption = "Red lines: first years of major conflicts \n Civil War, World war 1-2, Cuban Missile Crisis")
+
+plot5
+
+
+ggsave("./Final_project/Plot_05_Afinn_and_NRC_together.png") # not working well with ggMarginal
 
